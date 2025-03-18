@@ -1,0 +1,27 @@
+body{
+    background-color: #000000;
+    font-family: 'Roboto', sans-serif;
+    height: 100vh;
+    width:100%;
+}
+
+h1{
+    color: #ffffff;
+    text-align: center;
+    content: center;
+    flex-direction: column;
+}
+
+p{
+    color: #ffffff;
+    text-align: center;
+    content: center;
+    flex-direction: column;
+}
+
+footer{
+    color:#ffffff;
+    text-align: center;
+    content:center;
+    flex-direction: column;
+}
