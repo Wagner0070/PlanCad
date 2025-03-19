@@ -1,30 +1,26 @@
-# filepath: /home/wagner/Documentos/projetos/PlanCad/App/scripts/database.py
+#criação do back end que faá a mágica de criar o banco de dados que terá seus valores setados pelo App/Interface/html/main.html
 import sqlite3
+import os
 
-conn = sqlite3.connect('Cadastros.db')
-cursor = conn.cursor()
+def create_database():
+    #cria o banco de dados
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
 
-# Criação de tabela caso não exista
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS cadastros (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    data TEXT NOT NULL,
-    hora TEXT NOT NULL,
-    nome TEXT NOT NULL,
-    idade INTEGER NOT NULL,
-    email TEXT NOT NULL,
-    data_retorno TEXT NOT NULL,
-    hora_retorno TEXT NOT NULL
-);
-""")
-conn.commit()
-
-def inserir(data, hora, nome, idade, email, data_retorno, hora_retorno):
+    #cria a tabela
     cursor.execute("""
-    INSERT INTO cadastros (data, hora, nome, idade, email, data_retorno, hora_retorno) VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (data, hora, nome, idade, email, data_retorno, hora_retorno))
-    conn.commit()
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        date_time TEXT NOT NULL,
+        name TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        email TEXT NOT NULL,
+        date_return TEXT NOT NULL,
+        datetime_return TEXT NOT NULL,
+    );
+    """)
 
-def listar():
-    cursor.execute("SELECT * FROM cadastros")
-    return cursor.fetchall()
+    #salva as alterações
+    conn.commit()
+    conn.close()
