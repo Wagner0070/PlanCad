@@ -1,0 +1,175 @@
+/* Estilo geral */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Fundo escuro */
+    color: #e0e0e0; /* Texto claro */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Cabeçalho */
+header {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    padding: 2rem;
+    border-bottom: 2px solid #333333;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+header p {
+    margin: 0.5rem 0 0;
+    font-size: 1.2rem;
+    color: #bbbbbb;
+}
+
+/* Botões */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #333333; /* Fundo do botão */
+    color: #ffffff; /* Texto do botão */
+    border: 1px solid #444444; /* Borda do botão */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #555555; /* Fundo ao passar o mouse */
+    transform: scale(1.05);
+}
+
+/* Formulários */
+form {
+    margin: 20px 0;
+}
+
+form input {
+    margin: 5px;
+    padding: 10px;
+    width: 200px;
+    background-color: #1f1f1f; /* Fundo do campo de entrada */
+    color: #e0e0e0; /* Texto do campo de entrada */
+    border: 1px solid #333333; /* Borda do campo de entrada */
+    border-radius: 5px;
+}
+
+form input::placeholder {
+    color: #888888; /* Cor do texto placeholder */
+}
+
+form button {
+    margin-top: 10px;
+    background-color: #333333; /* Fundo do botão do formulário */
+    color: #ffffff; /* Texto do botão do formulário */
+    border: 1px solid #444444; /* Borda do botão do formulário */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+form button:hover {
+    background-color: #555555; /* Fundo ao passar o mouse */
+    color: #e0e0e0; /* Texto ao passar o mouse */
+}
+
+/* Links */
+a {
+    color: #4CAF50; /* Cor dos links */
+    text-decoration: none;
+}
+
+a:hover {
+    color: #66bb6a; /* Cor dos links ao passar o mouse */
+}
+
+/* Rodapé */
+footer {
+    margin-top: auto;
+    background-color: #1f1f1f; /* Fundo do rodapé */
+    color: #888888; /* Texto do rodapé */
+    padding: 1rem;
+    border-top: 2px solid #333333;
+}
+
+footer button {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #444444;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+footer button:hover {
+    background-color: #555555;
+    transform: scale(1.05);
+}
+
+/* Tabela */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+th, td {
+    border: 1px solid #333333;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #333333;
+}
+
+tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Transições entre páginas */
+main {
+    animation: fadeIn 1s ease-in-out;
+}

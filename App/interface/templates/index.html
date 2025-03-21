@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanCad - Página Inicial</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Bem-vindo ao PlanCad!</h1>
+        <p>Gerencie seus cadastros de forma simples e eficiente.</p>
+    </header>
+    <main>
+        <div class="button-container">
+            <button onclick="window.location.href='{{ url_for('app_page') }}'">Ir para a Aplicação</button>
+        </div>
+    </main>
+</body>
+</html>

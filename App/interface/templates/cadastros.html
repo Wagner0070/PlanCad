@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanCad - Gerenciar Cadastros</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Função para adicionar dinamicamente uma nova coluna
+        function adicionarColuna() {
+            const container = document.getElementById("campos-cadastro");
+            const novaDiv = document.createElement("div");
+            novaDiv.classList.add("campo-dinamico");
+
+            novaDiv.innerHTML = `
+                <select name="nova_coluna_tipo[]" required>
+                    <option value="TEXT">Texto</option>
+                    <option value="INTEGER">Número Inteiro</option>
+                </select>
+                <input type="text" name="nova_coluna_nome[]" placeholder="Nome da Coluna" required>
+                <button type="button" class="remover-campo" onclick="removerColuna(this)">-</button>
+            `;
+
+            container.appendChild(novaDiv);
+        }
+
+        // Função para remover uma coluna
+        function removerColuna(botao) {
+            const campo = botao.parentElement;
+            campo.remove();
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Gerenciar Cadastros</h1>
+    </header>
+    <main>
+        {% if erro %}
+            <p style="color: red;">{{ erro }}</p>
+        {% endif %}
+        <section>
+            <h2>Adicionar Novo Cadastro</h2>
+            <p>Use o botão "+" para adicionar uma nova coluna. Escolha o tipo da coluna e insira o nome dela.</p>
+            <form method="POST">
+                <div id="campos-cadastro">
+                    <!-- Campos fixos -->
+                    <div class="campo-dinamico">
+                        <input type="text" name="nome" placeholder="Nome" required>
+                        <input type="text" name="last_name" placeholder="Sobrenome" required>
+                        <input type="number" name="age" placeholder="Idade" required>
+                        <input type="email" name="email" placeholder="Email" required>
+                    </div>
+                </div>
+                <button type="button" onclick="adicionarColuna()">+</button>
+                <button type="submit">Adicionar Cadastro</button>
+            </form>
+        </section>
+        <section>
+            <h2>Cadastros Existentes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Sobrenome</th>
+                        <th>Idade</th>
+                        <th>Email</th>
+                        {% for coluna in colunas %}
+                            <th>{{ coluna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cadastro in cadastros %}
+                        <tr>
+                            <td>{{ cadastro['id'] }}</td>
+                            <td>{{ cadastro['nome'] }}</td>
+                            <td>{{ cadastro['last_name'] }}</td>
+                            <td>{{ cadastro['age'] }}</td>
+                            <td>{{ cadastro['email'] }}</td>
+                            {% for coluna in colunas %}
+                                <td>{{ cadastro[coluna] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        <button onclick="window.location.href='{{ url_for('homepage') }}'">Voltar para a Página Inicial</button>
+    </main>
+</body>
+</html>

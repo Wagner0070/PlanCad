@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanCad - Aplicação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Bem-vindo à Aplicação PlanCad!</h1>
+        <p>Escolha uma das opções abaixo para começar:</p>
+    </header>
+    <main>
+        <div class="button-container">
+            <button onclick="window.location.href='{{ url_for('gerenciar_cadastros') }}';">Gerenciar Cadastros</button>
+            <button onclick="window.location.href='{{ url_for('importar_arquivo') }}';">Importar Arquivo</button>
+        </div>
+    </main>
+    <footer>
+        <button onclick="window.location.href='{{ url_for('homepage') }}';">Voltar para a Página Inicial</button>
+    </footer>
+</body>
+</html>

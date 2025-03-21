@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanCad - Importar Arquivo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Importar Arquivo .db</h1>
+    </header>
+    <main>
+        <form method="POST" action="{{ url_for('importar_arquivo') }}" enctype="multipart/form-data">
+            <input type="file" name="arquivo" accept=".db" required>
+            <button type="submit">Importar</button>
+        </form>
+        {% if tabela %}
+            <h2>Dados Importados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        {% for coluna in tabela.columns %}
+                            <th>{{ coluna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for linha in tabela.values %}
+                        <tr>
+                            {% for valor in linha %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+</body>
+</html>
