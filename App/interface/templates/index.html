@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanCad - Página Inicial</title>
+    <title>PlanCad - Início</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='js/libcore.js') }}" defer></script>
 </head>
 <body>
     <header>
         <h1>Bem-vindo ao PlanCad!</h1>
-        <p>Gerencie seus cadastros de forma simples e eficiente.</p>
+        <p>Gerencie suas tabelas de forma simples e eficiente.</p>
     </header>
     <main>
         <div class="button-container">
-            <button onclick="window.location.href='{{ url_for('app_page') }}'">Ir para a Aplicação</button>
+            <button type="button" data-url="{{ url_for('gerenciar_tabelas') }}" onclick="redirecionar(this)">
+                Gerenciar Tabelas
+            </button>
         </div>
     </main>
+    <footer>
+        <p>Desenvolvido por <a href="https://github.com/Wagner0070" target="_blank">Wagner Luiz</a></p>
+    </footer>
 </body>
 </html>

@@ -1,5 +1,4 @@
-# Esse arquivo será para definir as rotas e deixar tudo organizadinho
-# Importando o Flask, SQLite3 e o app principal
+# Importações necessárias para o funcionamento do Flask e manipulação do banco de dados
 from flask import jsonify, request, render_template, redirect, url_for
 from main import app
 import sqlite3
@@ -9,8 +8,16 @@ import pandas as pd
 # Caminho para o banco de dados
 DB_PATH = os.path.join(os.path.dirname(__file__), "../database/cadastros.db")
 
-# Função para inicializar o banco de dados
+# ===========================
+# Funções auxiliares
+# ===========================
+
+# Inicializa o banco de dados ao iniciar o app
 def init_db():
+    """
+    Cria a tabela 'cadastros' no banco de dados se ela não existir.
+    Essa tabela é usada para armazenar os dados básicos de cadastro.
+    """
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -24,45 +31,64 @@ def init_db():
         """)
         conn.commit()
 
-# Inicializa o banco de dados ao iniciar o app
-init_db()
+init_db()  # Chama a função para garantir que o banco está configurado
 
-# Página inicial para apresentação do projeto
+# ===========================
+# Rotas principais
+# ===========================
+
 @app.route("/")
 def homepage():
+    """
+    Renderiza a página inicial do projeto.
+    """
     return render_template("index.html")
 
-# Página principal para o uso da aplicação
 @app.route("/app")
 def app_page():
+    """
+    Renderiza a página principal da aplicação.
+    """
     return render_template("app.html")
 
-# Página para gerenciar cadastros
+# ===========================
+# Gerenciamento de cadastros
+# ===========================
+
 @app.route("/cadastros", methods=["GET", "POST"])
 def gerenciar_cadastros():
+    """
+    Gerencia os cadastros:
+    - Exibe os cadastros existentes.
+    - Permite adicionar novos cadastros.
+    - Suporta a criação de colunas dinâmicas.
+    """
     if request.method == "POST":
+        # Obtém os dados do formulário
         nome = request.form.get("nome")
         last_name = request.form.get("last_name")
         age = request.form.get("age")
         email = request.form.get("email")
 
+        # Obtém as novas colunas dinâmicas
         novas_colunas_nomes = request.form.getlist("nova_coluna_nome[]")
         novas_colunas_tipos = request.form.getlist("nova_coluna_tipo[]")
 
+        # Valida os campos obrigatórios
         if not nome or not last_name or not age or not email:
             return render_template("cadastros.html", erro="Todos os campos fixos são obrigatórios!")
 
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
 
-            # Criar novas colunas dinamicamente
+            # Cria novas colunas dinamicamente, se necessário
             for nome_coluna, tipo_coluna in zip(novas_colunas_nomes, novas_colunas_tipos):
                 try:
                     cursor.execute(f"ALTER TABLE cadastros ADD COLUMN {nome_coluna} {tipo_coluna}")
                 except sqlite3.OperationalError:
-                    pass
+                    pass  # Ignora erros se a coluna já existir
 
-            # Inserir os valores no banco de dados
+            # Insere os valores no banco de dados
             colunas = ["nome", "last_name", "age", "email"] + novas_colunas_nomes
             valores = [nome, last_name, age, email] + [None] * len(novas_colunas_nomes)
             placeholders = ", ".join(["?"] * len(colunas))
@@ -72,6 +98,7 @@ def gerenciar_cadastros():
 
         return redirect(url_for("gerenciar_cadastros"))
 
+    # Exibe os cadastros e as colunas dinâmicas
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("PRAGMA table_info(cadastros)")
@@ -82,9 +109,12 @@ def gerenciar_cadastros():
 
     return render_template("cadastros.html", cadastros=cadastros, colunas=colunas)
 
-# Rota para buscar um cadastro por ID
 @app.route("/cadastros/<int:id>", methods=["GET"])
 def buscar_cadastro(id):
+    """
+    Busca um cadastro específico pelo ID.
+    Retorna os dados do cadastro em formato JSON.
+    """
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id, nome, last_name, age, email FROM cadastros WHERE id = ?", (id,))
@@ -97,9 +127,12 @@ def buscar_cadastro(id):
         })
     return jsonify({"erro": "Cadastro não encontrado"}), 404
 
-# Rota para remover um cadastro por ID
 @app.route("/cadastros/<int:id>", methods=["DELETE"])
 def remover_cadastro(id):
+    """
+    Remove um cadastro específico pelo ID.
+    Retorna uma mensagem de sucesso ou erro.
+    """
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM cadastros WHERE id = ?", (id,))
@@ -109,40 +142,80 @@ def remover_cadastro(id):
         return jsonify({"mensagem": f"Cadastro com ID {id} removido com sucesso!"})
     return jsonify({"erro": "Cadastro não encontrado"}), 404
 
-@app.route("/cadastros/adicionar_classe", methods=["POST"])
-def adicionar_classe():
-    nome_classe = request.form.get("nome_classe")
-    tipo_classe = request.form.get("tipo_classe")
+# ===========================
+# Gerenciamento de tabelas
+# ===========================
 
-    if not nome_classe or not tipo_classe:
-        return render_template("cadastros.html", erro="O nome e o tipo da classe são obrigatórios!")
+@app.route("/gerenciar_tabelas")
+def gerenciar_tabelas():
+    """
+    Exibe todas as tabelas existentes no banco de dados.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tabelas = [row[0] for row in cursor.fetchall()]
+    return render_template("cadastros.html", tabelas=tabelas)
+
+@app.route("/criar_tabela", methods=["POST"])
+def criar_tabela():
+    """
+    Cria uma nova tabela no banco de dados.
+    """
+    nome_tabela = request.form.get("nome_tabela")
+    colunas = request.form.get("colunas")
+
+    if not nome_tabela or not colunas:
+        return render_template("cadastros.html", erro="Nome da tabela e colunas são obrigatórios!")
 
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         try:
-            # Adiciona uma nova coluna à tabela cadastros com o tipo especificado
-            cursor.execute(f"ALTER TABLE cadastros ADD COLUMN {nome_classe} {tipo_classe}")
+            cursor.execute(f"CREATE TABLE {nome_tabela} ({colunas})")
             conn.commit()
-        except sqlite3.OperationalError:
-            return render_template("cadastros.html", erro="Essa classe já existe ou o nome é inválido!")
+        except sqlite3.Error as e:
+            return render_template("cadastros.html", erro=f"Erro ao criar tabela: {e}")
+    return redirect(url_for("gerenciar_tabelas"))
 
-    return redirect(url_for("gerenciar_cadastros"))
+@app.route("/apagar_tabelas", methods=["POST"])
+def apagar_tabelas():
+    """
+    Apaga tabelas selecionadas do banco de dados.
+    """
+    tabelas_selecionadas = request.form.getlist("tabelas_selecionadas")
 
-@app.route("/importar", methods=["GET", "POST"])
-def importar_arquivo():
-    tabela = None
-    if request.method == "POST":
-        arquivo = request.files.get("arquivo")
-        if arquivo and arquivo.filename.endswith(".db"):
-            caminho = os.path.join("uploads", arquivo.filename)
-            arquivo.save(caminho)
+    if not tabelas_selecionadas:
+        return render_template("cadastros.html", erro="Nenhuma tabela foi selecionada para apagar.")
 
-            # Ler o banco de dados usando pandas
-            with sqlite3.connect(caminho) as conn:
-                query = "SELECT name FROM sqlite_master WHERE type='table';"
-                tabelas = pd.read_sql(query, conn)
-                if not tabelas.empty:
-                    tabela_nome = tabelas.iloc[0, 0]
-                    tabela = pd.read_sql(f"SELECT * FROM {tabela_nome}", conn)
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        for tabela in tabelas_selecionadas:
+            try:
+                cursor.execute(f"DROP TABLE IF EXISTS {tabela}")
+            except sqlite3.Error as e:
+                print(f"Erro ao apagar a tabela {tabela}: {e}")
+                return render_template("cadastros.html", erro=f"Erro ao apagar a tabela {tabela}.")
+        conn.commit()
 
-    return render_template("importar.html", tabela=tabela)
+    return redirect(url_for("gerenciar_tabelas"))
+
+# ===========================
+# Execução de queries
+# ===========================
+
+@app.route("/executar_query", methods=["POST"])
+def executar_query():
+    """
+    Executa uma query SQL enviada pelo usuário.
+    """
+    query = request.form.get("query")
+
+    if not query:
+        return render_template("cadastros.html", erro="A query não pode estar vazia!")
+
+    with sqlite3.connect(DB_PATH) as conn:
+        try:
+            df = pd.read_sql_query(query, conn)
+            return render_template("cadastros.html", tabelas=[], resultado=df.to_html(classes="table"))
+        except Exception as e:
+            return render_template("cadastros.html", erro=f"Erro ao executar query: {e}")

@@ -8,4 +8,4 @@ from views import *
 
 #Eu irei rodar isso em modo de depuração, quero caçar erros aqui
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug = True)

@@ -1,10 +1,11 @@
 /* Estilo geral */
+/* Tema escuro */
 body {
     font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
     margin: 0;
     padding: 0;
-    background-color: #121212; /* Fundo escuro */
-    color: #e0e0e0; /* Texto claro */
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -14,9 +15,11 @@ body {
 /* Cabeçalho */
 header {
     background-color: #1f1f1f;
-    color: #ffffff;
-    padding: 2rem;
+    color: #4CAF50;
+    padding: 1.5rem;
+    text-align: center;
     border-bottom: 2px solid #333333;
+    animation: fadeIn 1s ease-in-out;
 }
 
 header h1 {
@@ -26,43 +29,49 @@ header h1 {
 
 header p {
     margin: 0.5rem 0 0;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: #bbbbbb;
 }
 
+/* Botões principais */
 /* Botões */
 .button-container {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap; /* Permite que os botões se ajustem em telas menores */
 }
 
 button {
     padding: 10px 20px;
-    background-color: #333333; /* Fundo do botão */
-    color: #ffffff; /* Texto do botão */
-    border: 1px solid #444444; /* Borda do botão */
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s, transform 0.3s;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 button:hover {
-    background-color: #555555; /* Fundo ao passar o mouse */
+    background-color: #388E3C;
     transform: scale(1.05);
 }
 
 /* Formulários */
 form {
     margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 form input {
     margin: 5px;
     padding: 10px;
-    width: 200px;
+    width: 100%; /* Ajusta a largura para telas menores */
+    max-width: 300px; /* Limita a largura máxima */
     background-color: #1f1f1f; /* Fundo do campo de entrada */
     color: #e0e0e0; /* Texto do campo de entrada */
     border: 1px solid #333333; /* Borda do campo de entrada */
@@ -105,6 +114,8 @@ footer {
     color: #888888; /* Texto do rodapé */
     padding: 1rem;
     border-top: 2px solid #333333;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
 }
 
 footer button {
@@ -123,13 +134,25 @@ footer button:hover {
     transform: scale(1.05);
 }
 
+footer a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+footer a:hover {
+    color: #66bb6a;
+}
+
 /* Tabela */
+/* Tabelas */
 table {
-    width: 80%;
-    margin: 20px auto;
+    width: 100%;
     border-collapse: collapse;
+    margin-top: 1rem;
     background-color: #1f1f1f;
     color: #e0e0e0;
+    overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
 }
 
 th, td {
@@ -140,6 +163,7 @@ th, td {
 
 th {
     background-color: #333333;
+    color: #4CAF50;
 }
 
 tr:nth-child(even) {
@@ -172,4 +196,114 @@ tr:nth-child(even) {
 /* Transições entre páginas */
 main {
     animation: fadeIn 1s ease-in-out;
+}
+
+/* Mensagem de erro */
+.erro {
+    color: #FF5252;
+    font-weight: bold;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+#query-builder {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #1f1f1f;
+    border-radius: 8px;
+}
+
+#query-builder label {
+    display: block;
+    margin: 0.5rem 0 0.2rem;
+    color: #4CAF50;
+}
+
+#query-builder input, #query-builder select, #query-builder button {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+}
+
+#resultado {
+    margin-top: 2rem;
+    overflow-x: auto;
+}
+
+#editar-tabela, #editar-valores {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #1f1f1f;
+    border-radius: 8px;
+}
+
+#editar-tabela label, #editar-valores label {
+    display: block;
+    margin: 0.5rem 0;
+    color: #4CAF50;
+}
+
+.coluna-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #2a2a2a;
+    border-radius: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    header p {
+        font-size: 1.2rem;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    form input {
+        max-width: 100%; /* Usa toda a largura disponível */
+    }
+
+    table {
+        font-size: 0.9rem; /* Reduz o tamanho da fonte em telas menores */
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    header p {
+        font-size: 1rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+
+    table {
+        font-size: 0.8rem;
+    }
+
+    th, td {
+        padding: 6px;
+    }
 }

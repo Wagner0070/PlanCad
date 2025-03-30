@@ -3,91 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanCad - Gerenciar Cadastros</title>
+    <title>PlanCad - Gerenciar Tabelas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        // Função para adicionar dinamicamente uma nova coluna
-        function adicionarColuna() {
-            const container = document.getElementById("campos-cadastro");
-            const novaDiv = document.createElement("div");
-            novaDiv.classList.add("campo-dinamico");
-
-            novaDiv.innerHTML = `
-                <select name="nova_coluna_tipo[]" required>
-                    <option value="TEXT">Texto</option>
-                    <option value="INTEGER">Número Inteiro</option>
-                </select>
-                <input type="text" name="nova_coluna_nome[]" placeholder="Nome da Coluna" required>
-                <button type="button" class="remover-campo" onclick="removerColuna(this)">-</button>
-            `;
-
-            container.appendChild(novaDiv);
-        }
-
-        // Função para remover uma coluna
-        function removerColuna(botao) {
-            const campo = botao.parentElement;
-            campo.remove();
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/libcore.js') }}" defer></script>
 </head>
 <body>
     <header>
-        <h1>Gerenciar Cadastros</h1>
+        <h1>Gerenciar Tabelas</h1>
     </header>
     <main>
         {% if erro %}
-            <p style="color: red;">{{ erro }}</p>
+            <p class="erro">{{ erro }}</p>
         {% endif %}
         <section>
-            <h2>Adicionar Novo Cadastro</h2>
-            <p>Use o botão "+" para adicionar uma nova coluna. Escolha o tipo da coluna e insira o nome dela.</p>
-            <form method="POST">
-                <div id="campos-cadastro">
-                    <!-- Campos fixos -->
-                    <div class="campo-dinamico">
-                        <input type="text" name="nome" placeholder="Nome" required>
-                        <input type="text" name="last_name" placeholder="Sobrenome" required>
-                        <input type="number" name="age" placeholder="Idade" required>
-                        <input type="email" name="email" placeholder="Email" required>
-                    </div>
-                </div>
-                <button type="button" onclick="adicionarColuna()">+</button>
-                <button type="submit">Adicionar Cadastro</button>
+            <h2>Criar Nova Tabela</h2>
+            <form method="POST" action="{{ url_for('criar_tabela') }}">
+                <input type="text" name="nome_tabela" placeholder="Nome da Tabela" required>
+                <input type="text" name="colunas" placeholder="Colunas (ex: nome TEXT, idade INTEGER)" required>
+                <button type="submit">Criar Tabela</button>
             </form>
         </section>
         <section>
-            <h2>Cadastros Existentes</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Sobrenome</th>
-                        <th>Idade</th>
-                        <th>Email</th>
-                        {% for coluna in colunas %}
-                            <th>{{ coluna }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cadastro in cadastros %}
+            <h2>Tabelas Existentes</h2>
+            <form method="POST" action="{{ url_for('apagar_tabelas') }}" id="form-apagar">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ cadastro['id'] }}</td>
-                            <td>{{ cadastro['nome'] }}</td>
-                            <td>{{ cadastro['last_name'] }}</td>
-                            <td>{{ cadastro['age'] }}</td>
-                            <td>{{ cadastro['email'] }}</td>
-                            {% for coluna in colunas %}
-                                <td>{{ cadastro[coluna] }}</td>
-                            {% endfor %}
+                            <th>Selecionar</th>
+                            <th>Nome da Tabela</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for tabela in tabelas %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="tabelas_selecionadas" value="{{ tabela }}">
+                                </td>
+                                <td>{{ tabela }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit">Apagar Tabelas Selecionadas</button>
+            </form>
         </section>
-        <button onclick="window.location.href='{{ url_for('homepage') }}'">Voltar para a Página Inicial</button>
+        <section>
+            <h2>Executar Query</h2>
+            <div id="query-builder">
+                <label for="tabela">Tabela:</label>
+                <select id="tabela" name="tabela" onchange="atualizarColunas()">
+                    <option value="">Selecione uma tabela</option>
+                    {% for tabela in tabelas %}
+                        <option value="{{ tabela }}">{{ tabela }}</option>
+                    {% endfor %}
+                </select>
+                <label for="colunas">Colunas:</label>
+                <select id="colunas" name="colunas" multiple>
+                    <!-- As colunas serão preenchidas dinamicamente -->
+                </select>
+                <label for="filtros">Filtros:</label>
+                <input type="text" id="filtros" name="filtros" placeholder="Ex: idade > 30">
+                <label for="ordenacao">Ordenar por:</label>
+                <input type="text" id="ordenacao" name="ordenacao" placeholder="Ex: nome ASC">
+                <button type="button" onclick="executarQuery()">Executar Query</button>
+            </div>
+            <div id="resultado">
+                <!-- A tabela de resultados será exibida aqui -->
+            </div>
+        </section>
+        <section>
+            <h2>Editar Tabela</h2>
+            <div id="editar-tabela">
+                <label for="tabela-editar">Selecione uma tabela:</label>
+                <select id="tabela-editar" name="tabela-editar" onchange="carregarColunas()">
+                    <option value="">Selecione uma tabela</option>
+                    {% for tabela in tabelas %}
+                        <option value="{{ tabela }}">{{ tabela }}</option>
+                    {% endfor %}
+                </select>
+                <div id="colunas-tabela">
+                    <!-- As colunas da tabela selecionada serão exibidas aqui -->
+                </div>
+                <button type="button" onclick="adicionarColuna()">Adicionar Coluna</button>
+            </div>
+        </section>
+        <section>
+            <h2>Editar Valores</h2>
+            <div id="editar-valores">
+                <div id="tabela-valores">
+                    <!-- A tabela de valores será exibida aqui -->
+                </div>
+            </div>
+        </section>
+        <button type="button" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Voltar para a Página Inicial
+        </button>
     </main>
 </body>
 </html>
