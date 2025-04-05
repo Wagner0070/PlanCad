@@ -3,101 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanCad - Gerenciar Tabelas</title>
+    <title>PlanCad - Gerenciar Banco de Dados</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/libcore.js') }}" defer></script>
 </head>
-<body>
-    <header>
-        <h1>Gerenciar Tabelas</h1>
-    </header>
-    <main>
-        {% if erro %}
-            <p class="erro">{{ erro }}</p>
-        {% endif %}
-        <section>
-            <h2>Criar Nova Tabela</h2>
-            <form method="POST" action="{{ url_for('criar_tabela') }}">
-                <input type="text" name="nome_tabela" placeholder="Nome da Tabela" required>
-                <input type="text" name="colunas" placeholder="Colunas (ex: nome TEXT, idade INTEGER)" required>
-                <button type="submit">Criar Tabela</button>
-            </form>
-        </section>
-        <section>
-            <h2>Tabelas Existentes</h2>
-            <form method="POST" action="{{ url_for('apagar_tabelas') }}" id="form-apagar">
-                <table>
+<body class="dark-theme">
+    <div class="container mt-4 fade-in">
+        <h1 class="text-center">PlanCad - Gerenciar Banco de Dados</h1>
+        <hr>
+
+        <!-- Botão para voltar ao início -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('homepage') }}'">
+                Voltar ao Início
+            </button>
+        </div>
+
+        <!-- Botão para criar uma nova tabela -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#criarTabelaModal">
+                Criar Nova Tabela
+            </button>
+        </div>
+
+        <!-- Modal para criar uma nova tabela -->
+        <div class="modal fade" id="criarTabelaModal" tabindex="-1" aria-labelledby="criarTabelaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="criarTabelaModalLabel">Criar Nova Tabela</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="criar-tabela-form">
+                            <div class="mb-3">
+                                <label for="nome-tabela" class="form-label">Nome da Tabela</label>
+                                <input type="text" class="form-control" id="nome-tabela" placeholder="Digite o nome da tabela" required>
+                            </div>
+                            <div id="colunas-container">
+                                <h6>Colunas</h6>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <input type="text" class="form-control" placeholder="Nome da Coluna" required>
+                                    </div>
+                                    <div class="col">
+                                        <select class="form-select" required>
+                                            <option value="TEXT">TEXT</option>
+                                            <option value="INTEGER">INTEGER</option>
+                                            <option value="REAL">REAL</option>
+                                            <option value="BLOB">BLOB</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" placeholder="Valor Padrão (opcional)">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-danger" onclick="removerColuna(this)">-</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary mb-3" onclick="adicionarColuna()">Adicionar Coluna</button>
+                        </form>
+
+                        <!-- Seção para apagar colunas -->
+                        <div id="apagar-colunas-container" class="mt-4">
+                            <h6>Apagar Colunas</h6>
+                            <div id="lista-colunas">
+                                <!-- Lista de colunas existentes será preenchida dinamicamente -->
+                            </div>
+                            <button type="button" class="btn btn-danger mt-2" onclick="apagarColunas()">Apagar Colunas Selecionadas</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success" onclick="criarTabela()">Criar Tabela</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegação por abas -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tabelas-tab" data-bs-toggle="tab" data-bs-target="#tabelas" type="button" role="tab">Tabelas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="query-tab" data-bs-toggle="tab" data-bs-target="#query" type="button" role="tab">Executar Query</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="editar-tab" data-bs-toggle="tab" data-bs-target="#editar" type="button" role="tab">Editar Tabelas</button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4" id="myTabContent">
+            <!-- Aba: Tabelas -->
+            <div class="tab-pane fade show active" id="tabelas" role="tabpanel">
+                <h2>Tabelas Existentes</h2>
+                <table id="tabelas-table" class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Selecionar</th>
                             <th>Nome da Tabela</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tabela in tabelas %}
-                            <tr>
-                                <td>
-                                    <input type="checkbox" name="tabelas_selecionadas" value="{{ tabela }}">
-                                </td>
-                                <td>{{ tabela }}</td>
-                            </tr>
+                        <tr>
+                            <td>{{ tabela }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="visualizarTabela('{{ tabela }}')">Visualizar</button>
+                                <button class="btn btn-danger btn-sm" onclick="apagarTabela('{{ tabela }}')">Apagar</button>
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <button type="submit">Apagar Tabelas Selecionadas</button>
-            </form>
-        </section>
-        <section>
-            <h2>Executar Query</h2>
-            <div id="query-builder">
-                <label for="tabela">Tabela:</label>
-                <select id="tabela" name="tabela" onchange="atualizarColunas()">
-                    <option value="">Selecione uma tabela</option>
-                    {% for tabela in tabelas %}
-                        <option value="{{ tabela }}">{{ tabela }}</option>
-                    {% endfor %}
-                </select>
-                <label for="colunas">Colunas:</label>
-                <select id="colunas" name="colunas" multiple>
-                    <!-- As colunas serão preenchidas dinamicamente -->
-                </select>
-                <label for="filtros">Filtros:</label>
-                <input type="text" id="filtros" name="filtros" placeholder="Ex: idade > 30">
-                <label for="ordenacao">Ordenar por:</label>
-                <input type="text" id="ordenacao" name="ordenacao" placeholder="Ex: nome ASC">
-                <button type="button" onclick="executarQuery()">Executar Query</button>
             </div>
-            <div id="resultado">
-                <!-- A tabela de resultados será exibida aqui -->
-            </div>
-        </section>
-        <section>
-            <h2>Editar Tabela</h2>
-            <div id="editar-tabela">
-                <label for="tabela-editar">Selecione uma tabela:</label>
-                <select id="tabela-editar" name="tabela-editar" onchange="carregarColunas()">
-                    <option value="">Selecione uma tabela</option>
-                    {% for tabela in tabelas %}
-                        <option value="{{ tabela }}">{{ tabela }}</option>
-                    {% endfor %}
-                </select>
-                <div id="colunas-tabela">
-                    <!-- As colunas da tabela selecionada serão exibidas aqui -->
-                </div>
-                <button type="button" onclick="adicionarColuna()">Adicionar Coluna</button>
-            </div>
-        </section>
-        <section>
-            <h2>Editar Valores</h2>
-            <div id="editar-valores">
-                <div id="tabela-valores">
-                    <!-- A tabela de valores será exibida aqui -->
+
+            <!-- Aba: Executar Query -->
+            <div class="tab-pane fade" id="query" role="tabpanel">
+                <h2>Executar Query</h2>
+                <textarea id="query-editor" class="form-control" rows="5" placeholder="Digite sua query SQL aqui..."></textarea>
+                <button class="btn btn-success mt-2" onclick="executarQuery()">Executar</button>
+                <div id="query-result" class="mt-4">
+                    <!-- Resultados da query serão exibidos aqui -->
                 </div>
             </div>
-        </section>
-        <button type="button" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Voltar para a Página Inicial
-        </button>
-    </main>
+
+            <!-- Aba: Editar Tabelas -->
+            <div class="tab-pane fade" id="editar" role="tabpanel">
+                <h2>Editar Tabelas</h2>
+                <form id="editar-tabela-form">
+                    <label for="tabela-editar" class="form-label">Selecione uma tabela:</label>
+                    <select id="tabela-editar" class="form-select" onchange="carregarColunas()">
+                        <option value="">Selecione uma tabela</option>
+                        {% for tabela in tabelas %}
+                        <option value="{{ tabela }}">{{ tabela }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="colunas-tabela" class="mt-3">
+                        <!-- As colunas da tabela selecionada serão exibidas aqui -->
+                    </div>
+                    <button type="button" class="btn btn-primary mt-3" onclick="adicionarColuna()">Adicionar Coluna</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/sql/sql.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/libcore.js') }}"></script>
+    <script>
+        // Inicializa DataTables
+        $(document).ready(function() {
+            $('#tabelas-table').DataTable();
+        });
+
+        // Inicializa CodeMirror para o editor de queries
+        const queryEditor = CodeMirror.fromTextArea(document.getElementById("query-editor"), {
+            mode: "text/x-sql",
+            theme: "default",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true
+        });
+
+        // Função para adicionar uma nova coluna no modal
+        function adicionarColuna() {
+            const colunasContainer = document.getElementById("colunas-container");
+            const novaColuna = `
+                <div class="row mb-3">
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Nome da Coluna" required>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" required>
+                            <option value="TEXT">TEXT</option>
+                            <option value="INTEGER">INTEGER</option>
+                            <option value="REAL">REAL</option>
+                            <option value="BLOB">BLOB</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Valor Padrão (opcional)">
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger" onclick="removerColuna(this)">-</button>
+                    </div>
+                </div>
+            `;
+            colunasContainer.insertAdjacentHTML("beforeend", novaColuna);
+        }
+
+        // Função para remover uma coluna no modal
+        function removerColuna(botao) {
+            botao.closest(".row").remove();
+        }
+
+        // Função para criar a tabela (enviar os dados para o backend)
+        function criarTabela() {
+            const nomeTabela = document.getElementById("nome-tabela").value;
+            const colunas = Array.from(document.querySelectorAll("#colunas-container .row")).map(row => {
+                const nome = row.querySelector("input[type='text']").value;
+                const tipo = row.querySelector("select").value;
+                const valorPadrao = row.querySelector("input[type='text']:nth-child(3)").value || null;
+                return { nome, tipo, valorPadrao };
+            });
+
+            // Enviar os dados para o backend (exemplo com fetch)
+            fetch("/criar_tabela", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nomeTabela, colunas })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Tabela criada com sucesso!");
+                    location.reload();
+                } else {
+                    alert("Erro ao criar tabela: " + data.error);
+                }
+            })
+            .catch(error => console.error("Erro:", error));
+        }
+    </script>
 </body>
 </html>

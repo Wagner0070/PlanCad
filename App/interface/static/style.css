@@ -12,6 +12,13 @@ body {
     min-height: 100vh;
 }
 
+/* Tema escuro */
+body.dark-theme {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+}
+
 /* Cabeçalho */
 header {
     background-color: #1f1f1f;
@@ -20,6 +27,11 @@ header {
     text-align: center;
     border-bottom: 2px solid #333333;
     animation: fadeIn 1s ease-in-out;
+}
+
+header, footer {
+    text-align: center;
+    padding: 20px;
 }
 
 header h1 {
@@ -31,6 +43,10 @@ header p {
     margin: 0.5rem 0 0;
     font-size: 1.5rem;
     color: #bbbbbb;
+}
+
+header h1, footer p {
+    color: #ffffff;
 }
 
 /* Botões principais */
@@ -46,7 +62,7 @@ header p {
 button {
     padding: 10px 20px;
     font-size: 1rem;
-    background-color: #4CAF50;
+    background-color: #1e88e5;
     color: white;
     border: none;
     border-radius: 5px;
@@ -55,7 +71,7 @@ button {
 }
 
 button:hover {
-    background-color: #388E3C;
+    background-color: #1565c0;
     transform: scale(1.05);
 }
 
@@ -190,6 +206,20 @@ tr:nth-child(even) {
     to {
         opacity: 1;
         transform: translateX(0);
+    }
+}
+
+/* Animações */
+.fade-in {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 

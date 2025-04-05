@@ -104,6 +104,57 @@ function carregarColunas() {
         .catch(error => console.error("Erro ao carregar colunas:", error));
 }
 
+// Função para carregar as colunas existentes no modal
+function carregarColunasExistentes(nomeTabela) {
+    fetch(`/colunas/${nomeTabela}`)
+        .then(response => response.json())
+        .then(data => {
+            const listaColunas = document.getElementById("lista-colunas");
+            listaColunas.innerHTML = ""; // Limpa a lista antes de preencher
+            data.colunas.forEach(coluna => {
+                const checkbox = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${coluna}" id="coluna-${coluna}">
+                        <label class="form-check-label" for="coluna-${coluna}">
+                            ${coluna}
+                        </label>
+                    </div>
+                `;
+                listaColunas.insertAdjacentHTML("beforeend", checkbox);
+            });
+        })
+        .catch(error => console.error("Erro ao carregar colunas:", error));
+}
+
+// Função para apagar as colunas selecionadas
+function apagarColunas() {
+    const checkboxes = document.querySelectorAll("#lista-colunas .form-check-input:checked");
+    const colunasSelecionadas = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+    if (colunasSelecionadas.length === 0) {
+        alert("Selecione pelo menos uma coluna para apagar.");
+        return;
+    }
+
+    const nomeTabela = document.getElementById("nome-tabela").value;
+
+    fetch(`/apagar_colunas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nomeTabela, colunas: colunasSelecionadas })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Colunas apagadas com sucesso!");
+                carregarColunasExistentes(nomeTabela); // Atualiza a lista de colunas
+            } else {
+                alert("Erro ao apagar colunas: " + data.error);
+            }
+        })
+        .catch(error => console.error("Erro ao apagar colunas:", error));
+}
+
 // ==============================
 // Funções de manipulação de dados
 // ==============================

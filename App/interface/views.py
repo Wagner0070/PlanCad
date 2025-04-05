@@ -199,6 +199,28 @@ def apagar_tabelas():
 
     return redirect(url_for("gerenciar_tabelas"))
 
+@app.route("/apagar_colunas", methods=["POST"])
+def apagar_colunas():
+    """
+    Apaga colunas selecionadas de uma tabela.
+    """
+    data = request.get_json()
+    nome_tabela = data.get("nomeTabela")
+    colunas = data.get("colunas")
+
+    if not nome_tabela or not colunas:
+        return jsonify({"error": "Nome da tabela e colunas são obrigatórios."}), 400
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            for coluna in colunas:
+                cursor.execute(f"ALTER TABLE {nome_tabela} DROP COLUMN {coluna}")
+            conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # ===========================
 # Execução de queries
 # ===========================
@@ -207,6 +229,7 @@ def apagar_tabelas():
 def executar_query():
     """
     Executa uma query SQL enviada pelo usuário.
+    Diferencia queries de leitura (SELECT) e escrita (INSERT, UPDATE, DELETE).
     """
     query = request.form.get("query")
 
@@ -215,7 +238,34 @@ def executar_query():
 
     with sqlite3.connect(DB_PATH) as conn:
         try:
-            df = pd.read_sql_query(query, conn)
-            return render_template("cadastros.html", tabelas=[], resultado=df.to_html(classes="table"))
-        except Exception as e:
+            # Verifica se a query é uma consulta (SELECT)
+            if query.strip().lower().startswith("select"):
+                # Usa pandas para executar a query e retornar os resultados
+                df = pd.read_sql_query(query, conn)
+                return render_template("cadastros.html", tabelas=[], resultado=df.to_html(classes="table"))
+            else:
+                # Para outras queries (INSERT, UPDATE, DELETE), usa o cursor do SQLite
+                cursor = conn.cursor()
+                cursor.execute(query)
+                conn.commit()
+                return render_template("cadastros.html", tabelas=[], resultado="Query executada com sucesso!")
+        except sqlite3.Error as e:
+            # Captura erros do SQLite e exibe para o usuário
             return render_template("cadastros.html", erro=f"Erro ao executar query: {e}")
+        except pd.errors.DatabaseError as e:
+            # Captura erros do pandas e exibe para o usuário
+            return render_template("cadastros.html", erro=f"Erro ao executar query com pandas: {e}")
+
+@app.route("/colunas/<nome_tabela>", methods=["GET"])
+def listar_colunas(nome_tabela):
+    """
+    Retorna as colunas de uma tabela específica.
+    """
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f"PRAGMA table_info({nome_tabela})")
+            colunas = [row[1] for row in cursor.fetchall()]  # O nome da coluna está no índice 1
+        return jsonify({"colunas": colunas})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlanCad - Início</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/libcore.js') }}" defer></script>
 </head>
-<body>
-    <header>
+<body class="dark-theme">
+    <header class="fade-in">
         <h1>Bem-vindo ao PlanCad!</h1>
         <p>Gerencie suas tabelas de forma simples e eficiente.</p>
     </header>
     <main>
         <div class="button-container">
-            <button type="button" data-url="{{ url_for('gerenciar_tabelas') }}" onclick="redirecionar(this)">
+            <button type="button" class="btn btn-primary" onclick="window.location.href='{{ url_for('gerenciar_cadastros') }}'">
                 Gerenciar Tabelas
             </button>
         </div>
     </main>
-    <footer>
+    <footer class="fade-in">
         <p>Desenvolvido por <a href="https://github.com/Wagner0070" target="_blank">Wagner Luiz</a></p>
     </footer>
 </body>
